@@ -44,10 +44,11 @@ public class DataMaskController {
 
     public void updateAll(String email,String oldMsisdn,String newMsisdn) {
     	logger.info("processing: Email: " + email + " OldMsisdn: " + oldMsisdn + " NewMsisdn: " +newMsisdn);
-    	String validatedMsisdn=msisdnValidator.validateMsisdn(newMsisdn);
-    	if(!validatedMsisdn.equals("invalid")) {
-    		processUpdateRequestService.processUpdateRequestForIdentityV3(email,oldMsisdn,validatedMsisdn);
-        	processUpdateRequestService.processUpdateForIdentitityActivationDetails(email, oldMsisdn, validatedMsisdn);
+    	String validatedNewMsisdn=msisdnValidator.validateNewMsisdn(newMsisdn);
+    	String validateOldMsisdn=msisdnValidator.validateOldMsisdn(oldMsisdn);
+    	if(!validatedNewMsisdn.equals("invalid")) {
+    		processUpdateRequestService.processUpdateRequestForIdentityV3(email,oldMsisdn,validatedNewMsisdn);
+        	//processUpdateRequestService.processUpdateForIdentitityActivationDetails(email, oldMsisdn, validatedMsisdn);
     	}
     	else {
     		logger.info("Provided NewMsisdn: "+newMsisdn+" is Invalid");

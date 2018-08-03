@@ -39,8 +39,15 @@ public class IdentityV3Service {
         	String msisdnInIdentityV3 = null;
         	for (IdentityV3 identityV3 : identityV3s) {
         		msisdnInIdentityV3=identityV3.getMsisdn();
+        		if(msisdnInIdentityV3==null)
+        			msisdnInIdentityV3 = "null";
             }
         	if(msisdnInIdentityV3.equals(oldMsisdn)) {
+        		fileUtility.writeToFileIfDataIsPresent(CustomStringUtil.getStringFormatFromList(identityV3s), "identityV3.backup.file");
+        		logger.info("backup has been created for Username: "+username);
+        		return true;
+        	}
+        	else if(msisdnInIdentityV3.equals("null")){
         		fileUtility.writeToFileIfDataIsPresent(CustomStringUtil.getStringFormatFromList(identityV3s), "identityV3.backup.file");
         		logger.info("backup has been created for Username: "+username);
         		return true;
