@@ -51,8 +51,6 @@ public class IdentityMaskApplication {
 		logger.info("Execution Started for Identity to update identityV3 and identityActivationDetailCollection");
 		dataMaskController.execute();
 		((ConfigurableApplicationContext) context).close();
-
 	}
-
 }
 	

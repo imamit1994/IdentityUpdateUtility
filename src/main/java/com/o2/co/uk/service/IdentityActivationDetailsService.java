@@ -32,23 +32,32 @@ public class IdentityActivationDetailsService {
 		List<IdentityActivationDetails> identityActivationDetailsList = mongoTemplate.find(query,
 				IdentityActivationDetails.class);
 		if (identityActivationDetailsList.size() != 0) {
-			String contactNoIdentityActivationdetails = null;
-			for (IdentityActivationDetails identityActivationDetails : identityActivationDetailsList) {
-				contactNoIdentityActivationdetails = identityActivationDetails.getContactNumber();
-			}
-			if (contactNoIdentityActivationdetails.equals(oldMsisdn)) {
-				fileUtility.writeToFileIfDataIsPresent(
-						CustomStringUtil.getStringFormatFromList(identityActivationDetailsList),
-						"identityActivationDetails.backup.file");
-				logger.info("backup has been created for Email: " + email);
-				return true;
-			} else {
-				logger.info("Provided msisdn is not matched with ContactNo present in database");
-				String UnProcessedData = "Email: " + email + "," + "ContactNumber: " + oldMsisdn;
-				fileUtility.writeToFileIfDataIsPresent(UnProcessedData,
-						"identityActivationDetails.unprocessed.backup.file");
-				return false;
-			}
+			fileUtility.writeToFileIfDataIsPresent(
+					CustomStringUtil.getStringFormatFromList(identityActivationDetailsList),
+					"identityActivationDetails.backup.file");
+			logger.info("backup has been created for Email: " + email);
+			return true;
+			// String contactNoIdentityActivationdetails = null;
+			// for (IdentityActivationDetails identityActivationDetails :
+			// identityActivationDetailsList) {
+			// contactNoIdentityActivationdetails =
+			// identityActivationDetails.getContactNumber();
+			// }
+			// if (contactNoIdentityActivationdetails.equals(oldMsisdn)) {
+			// fileUtility.writeToFileIfDataIsPresent(
+			// CustomStringUtil.getStringFormatFromList(identityActivationDetailsList),
+			// "identityActivationDetails.backup.file");
+			// logger.info("backup has been created for Email: " + email);
+			// return true;
+			// } else {
+			// logger.info("Provided msisdn is not matched with ContactNo present in
+			// database");
+			// String UnProcessedData = "Email: " + email + "," + "ContactNumber: " +
+			// oldMsisdn;
+			// fileUtility.writeToFileIfDataIsPresent(UnProcessedData,
+			// "identityActivationDetails.unprocessed.backup.file");
+			// return false;
+			// }
 
 		} else {
 			logger.info("No entry found for Email: " + email);
@@ -62,8 +71,9 @@ public class IdentityActivationDetailsService {
 	public void updateIdentityActivationDetailCollection(String email, String oldMsisdn, String newMsisdn) {
 		Query query = new Query(Criteria.where("email").is(email));
 		Update update = new Update();
-		update.set("contactNumber",newMsisdn);
+		update.set("contactNumber", newMsisdn);
 		UpdateResult updateResult = mongoTemplate.updateMulti(query, update, IdentityActivationDetails.class);
-		logger.info("updated IdentityActivationDetail for Email: "+email+" OldContactNo: "+oldMsisdn+" NewContactNo: "+newMsisdn+" UpdateResult: "+updateResult);
+		logger.info("updated IdentityActivationDetail for Email: " + email + " OldContactNo: " + oldMsisdn
+				+ " NewContactNo: " + newMsisdn + " UpdateResult: " + updateResult);
 	}
 }

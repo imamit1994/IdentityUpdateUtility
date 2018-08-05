@@ -21,59 +21,67 @@ import java.util.stream.Collectors;
 @Component
 public class IdentityV3Service {
 
-    private static final Logger logger = Logger.getLogger(IdentityV3Service.class);
+	private static final Logger logger = Logger.getLogger(IdentityV3Service.class);
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+	@Autowired
+	private MongoTemplate mongoTemplate;
 
-    @Autowired
-    private PropertiesManager propertiesManager;
+	@Autowired
+	private PropertiesManager propertiesManager;
 
-    @Autowired
-    private FileUtility fileUtility;
+	@Autowired
+	private FileUtility fileUtility;
 
-    public boolean getBackupUsingUid(String username,String oldMsisdn) {
-    	Query query = new Query(Criteria.where("username").is(username));
-        List<IdentityV3> identityV3s = mongoTemplate.find(query, IdentityV3.class);
-        if(identityV3s.size()!=0) {
-        	String msisdnInIdentityV3 = null;
-        	for (IdentityV3 identityV3 : identityV3s) {
-        		msisdnInIdentityV3=identityV3.getMsisdn();
-        		if(msisdnInIdentityV3==null)
-        			msisdnInIdentityV3 = "null";
-            }
-        	if(msisdnInIdentityV3.equals(oldMsisdn)) {
-        		fileUtility.writeToFileIfDataIsPresent(CustomStringUtil.getStringFormatFromList(identityV3s), "identityV3.backup.file");
-        		logger.info("backup has been created for Username: "+username);
-        		return true;
-        	}
-        	else if(msisdnInIdentityV3.equals("null")){
-        		fileUtility.writeToFileIfDataIsPresent(CustomStringUtil.getStringFormatFromList(identityV3s), "identityV3.backup.file");
-        		logger.info("backup has been created for Username: "+username);
-        		return true;
-        	}
-        	else {
-        		logger.info("Provided msisdn is not matched with msisdn present in database");
-            	String UnProcessedData="Username: "+username+","+"OldMsisdn: "+oldMsisdn;
-            	fileUtility.writeToFileIfDataIsPresent(UnProcessedData, "identityV3.unprocessed.backup.file");
-            	return false;
-        	}
-        		
-        }
-        else {
-        	logger.info("No entry found for Username: "+username);
-        	String UnProcessedData="Username: "+username+","+"OldMsisdn: "+oldMsisdn;
-        	fileUtility.writeToFileIfDataIsPresent(UnProcessedData, "identityV3.unprocessed.backup.file");
-        	return false;
-        }
-    }
-    
-    public void updateIdentityV3Collection(String username,String oldMsisdn,String newMsisdn) {
-    	Query query = new Query(Criteria.where("username").is(username));
-    	 Update update = new Update();
-    	 update.set("msisdn",newMsisdn);
-    	 UpdateResult updateResult = mongoTemplate.updateMulti(query, update, IdentityV3.class );
-    	 logger.info("updated IdentityV3 for Username: "+username+" OldMsisdn: "+oldMsisdn+" NewMsisdn: "+newMsisdn+" UpdateResult: "+updateResult);
-    }
+	public boolean getBackupUsingUid(String username, String oldMsisdn) {
+		String last10DigitOfOldMsisdn = oldMsisdn.substring(oldMsisdn.length() - 10, oldMsisdn.length());
+		Query query = new Query(Criteria.where("username").is(username));
+		List<IdentityV3> identityV3s = mongoTemplate.find(query, IdentityV3.class);
+		if (identityV3s.size() != 0) {
+			String msisdnInIdentityV3 = null;
+			for (IdentityV3 identityV3 : identityV3s) {
+				msisdnInIdentityV3 = identityV3.getMsisdn();
+				if (msisdnInIdentityV3 == null)
+					msisdnInIdentityV3 = "null";
+			}
+			if (msisdnInIdentityV3.equals(oldMsisdn) || msisdnInIdentityV3.equals("0" + last10DigitOfOldMsisdn)
+					|| msisdnInIdentityV3.equals("44" + last10DigitOfOldMsisdn)
+					|| msisdnInIdentityV3.equals("+44" + last10DigitOfOldMsisdn)) {
+				fileUtility.writeToFileIfDataIsPresent(CustomStringUtil.getStringFormatFromList(identityV3s),
+						"identityV3.backup.file");
+				logger.info("backup has been created for Username: " + username);
+				return true;
+			} else if (msisdnInIdentityV3.equals("null")) {
+				fileUtility.writeToFileIfDataIsPresent(CustomStringUtil.getStringFormatFromList(identityV3s),
+						"identityV3.backup.file");
+				logger.info("backup has been created for Username: " + username);
+				return true;
+			} else {
+				logger.info("Provided OldMsisdn is not matched with msisdn present in database");
+				String UnProcessedData = "Username: " + username + "," + "OldMsisdn: " + oldMsisdn;
+				fileUtility.writeToFileIfDataIsPresent(UnProcessedData, "identityV3.unprocessed.backup.file");
+				String UnProcessedDataActivation = "Email: " + username + "," + "ContactNumber: " + oldMsisdn;
+				fileUtility.writeToFileIfDataIsPresent(UnProcessedDataActivation,
+						"identityActivationDetails.unprocessed.backup.file");
+				return false;
+			}
+
+		} else {
+			logger.info("No entry found for Username: " + username);
+			String UnProcessedData = "Username: " + username + "," + "OldMsisdn: " + oldMsisdn;
+			fileUtility.writeToFileIfDataIsPresent(UnProcessedData, "identityV3.unprocessed.backup.file");
+			String UnProcessedDataActivation = "Email: " + username + "," + "ContactNumber: " + oldMsisdn;
+			fileUtility.writeToFileIfDataIsPresent(UnProcessedDataActivation,
+					"identityActivationDetails.unprocessed.backup.file");
+			return false;
+		}
+	}
+
+	public void updateIdentityV3Collection(String username, String oldMsisdn, String newMsisdn) {
+		Query query = new Query(Criteria.where("username").is(username));
+		Update update = new Update();
+		update.set("msisdn", newMsisdn);
+		UpdateResult updateResult = mongoTemplate.updateMulti(query, update, IdentityV3.class);
+		logger.info("updated IdentityV3 for Username: " + username + " OldMsisdn: " + oldMsisdn + " NewMsisdn: "
+				+ newMsisdn + " UpdateResult: " + updateResult);
+	}
 }
-

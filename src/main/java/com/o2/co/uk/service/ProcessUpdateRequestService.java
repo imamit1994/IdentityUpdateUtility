@@ -15,12 +15,13 @@ public class ProcessUpdateRequestService {
 	@Autowired
     private IdentityActivationDetailsService identityActivationDetailsService;
 	
-	public void processUpdateRequestForIdentityV3(String userName,String oldMsisdn,String newMsisdn) {
+	public boolean processUpdateRequestForIdentityV3(String userName,String oldMsisdn,String newMsisdn) {
 		logger.info("processing for identityV3 Collection");
 		boolean backupCreated=identityV3Service.getBackupUsingUid(userName,oldMsisdn);
 		if(backupCreated) {
-			//identityV3Service.updateIdentityV3Collection(userName, oldMsisdn, newMsisdn);
+			identityV3Service.updateIdentityV3Collection(userName, oldMsisdn, newMsisdn);
 		}
+		return backupCreated;
 	}
 	
 	public void processUpdateForIdentitityActivationDetails(String email,String oldMsisdn,String newMsisdn) {

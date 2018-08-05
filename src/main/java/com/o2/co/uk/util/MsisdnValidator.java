@@ -63,7 +63,9 @@ public class MsisdnValidator {
 	public String validateOldMsisdn(String msisdn) {
 		if ((msisdn.length() >= 10) && (msisdn.length() <= 13)) {
 			return msisdn;
-		} else
+		} else {
+			logger.info("OldMsisdn should be null or length must be between 10 and 13");
 			return "invalid";
+		}
 	}
 }
